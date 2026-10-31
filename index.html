@@ -463,10 +463,13 @@ body{font-family:'Pretendard','Noto Sans KR',sans-serif;letter-spacing:-.012em}
 :root[data-theme="light"] .pc .pn span em{color:var(--gold)}
 .pc .rkb{align-self:flex-start;font-size:11px;font-weight:900;color:var(--mut);background:var(--s2);border:1px solid var(--line);border-radius:8px;padding:3px 7px;font-variant-numeric:tabular-nums}
 .pc .rkb.t1{color:#08101f;background:linear-gradient(135deg,#6ee7ff,#5aa6ff);border-color:transparent}
-.pc .ps{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:14px 0 10px}
-.pc .ps div{background:color-mix(in srgb,var(--s2) 70%,transparent);border:1px solid var(--line);border-radius:11px;padding:8px 6px;text-align:center}
+.pc .ps{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:14px 0 10px}
+.pc .pdl{display:flex;align-items:center;gap:6px;margin:-2px 0 10px;padding:6px 9px;border-radius:9px;background:color-mix(in srgb,#ff9f43 12%,transparent);border:1px solid color-mix(in srgb,#ff9f43 35%,transparent);font-size:11.5px;color:var(--mut)}
+.pc .pdl b{color:#ffb35c;font-size:13px;font-weight:900}
+.pc .pdl span{margin-left:auto;font-size:10.5px;color:var(--dim)}
+.pc .ps div{background:color-mix(in srgb,var(--s2) 70%,transparent);border:1px solid var(--line);border-radius:11px;padding:8px 3px;text-align:center;min-width:0}
 .pc .ps span{display:block;font-size:10px;color:var(--dim);margin-bottom:3px}
-.pc .ps b{font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+.pc .ps b{font-size:14.5px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pc .ps .hl b{background:linear-gradient(90deg,#7cc0ff,#6ee7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
 :root[data-theme="light"] .pc .ps .hl b{background:none;color:var(--gold)}
 .pc .wrbar{height:5px;border-radius:9px;background:var(--s2);overflow:hidden;border:1px solid var(--line)}
@@ -517,7 +520,7 @@ body{font-family:'Pretendard','Noto Sans KR',sans-serif;letter-spacing:-.012em}
   </div>
   <div class="stat st4">
    <div class="lbl">전체 순위 보기</div>
-   <div class="seg seg4" id="rview"><button data-rv="wr">승률순</button><button data-rv="kd">KD순</button><button data-rv="k">전체 킬순</button><button data-rv="g">참여순</button></div>
+   <div class="seg seg4" id="rview"><button data-rv="kd">KD순</button><button data-rv="wr">승률순</button><button data-rv="k">누적 킬순</button><button data-rv="g">참여순</button></div>
   </div>
   <div class="stat st3"><div class="lbl">티어 선택</div><div class="tnav" id="tnav"></div></div>
   <div class="stat abox st5">
@@ -546,8 +549,8 @@ body{font-family:'Pretendard','Noto Sans KR',sans-serif;letter-spacing:-.012em}
  </main>
 
  <aside class="card rank">
-  <div class="top"><div><div class="eyebrow">MEMBER RANKING</div><h3 id="rTitle">최고 승률 TOP 10</h3><small>3게임 이상 참여한 멤버 기준</small></div></div>
-  <div class="seg rseg" id="rseg"><button data-r="wr" class="on">승률</button><button data-r="kd">평균 KD</button><button data-r="k">전체 킬</button></div>
+  <div class="top"><div><div class="eyebrow">MEMBER RANKING</div><h3 id="rTitle">평균 KD TOP 10</h3><small>3게임 이상 참여한 멤버 기준</small></div></div>
+  <div class="seg rseg" id="rseg"><button data-r="kd" class="on">평균 KD</button><button data-r="wr">승률</button><button data-r="k">누적 킬</button></div>
   <div id="rankList"></div>
   <button class="btn rall" id="rAll">전체 참가자 순위 보기 →</button>
  </aside>
@@ -559,7 +562,7 @@ body{font-family:'Pretendard','Noto Sans KR',sans-serif;letter-spacing:-.012em}
 <script>
 var API='https://script.google.com/macros/s/AKfycbyHfQC9_hT0G_H6OTzXVVCelz2K875S161yXT2gbxy-DNxpmWdnzkRycx8ZF8Bikkke/exec';
 var CURD=null,SEAS='';
-var D=null,M={},MODE='all',VIEW='tier',RK='wr',Q='',RULE='전체',GLIM=25,CHIPN=15,MINR=3,RV='wr',RMIN=1;
+var D=null,M={},MODE='all',VIEW='tier',RK='kd',Q='',RULE='전체',GLIM=25,CHIPN=15,MINR=3,RV='kd',RMIN=1;
 var TIERS=['갓티어','1티어 상','1티어 하','2티어 상','2티어 하','3티어','4티어','BABY티어','미배정'];
 var TC={'갓티어':'#ff5a76','1티어 상':'#ff9f43','1티어 하':'#f6c560','2티어 상':'#2ed3b7','2티어 하':'#62c6ee','3티어':'#9b8cff','4티어':'#a3adbf','BABY티어':'#f59bd0','미배정':'#6b7280'};
 function $(i){return document.getElementById(i)}
@@ -580,9 +583,9 @@ function api(k,ok){var done=false,cb='__hh'+(++JN),sc=document.createElement('sc
 function mLabel(m){if(m=='all')return '통합';var q=String(m).split(':');return (q[0]=='d'?'킬딜내기 ':'킬내기 ')+(q[1]||'')}
 function build(games,tiers,only){
  games=games.slice().sort(function(a,b){return b.t-a.t});var P={};
- games.forEach(function(g){g.p.forEach(function(x){var n=x[0];var p=P[n]||(P[n]={n:n,g:0,w:0,k:0,h:[]});p.g++;p.w+=x[2];p.k+=x[1];p.h.push({g:g,k:x[1],w:x[2]})})});
+ games.forEach(function(g){var dm=null;if(/킬딜/.test(g.l)&&g.d){dm={};g.d.forEach(function(t){t.m.forEach(function(m){dm[m[0]]=Number(m[4])||0})})}g.p.forEach(function(x){var n=x[0];var p=P[n]||(P[n]={n:n,g:0,w:0,k:0,h:[],dg:0,dl:0});p.g++;p.w+=x[2];p.k+=x[1];if(dm&&dm[n]!=null){p.dg++;p.dl+=dm[n]}p.h.push({g:g,k:x[1],w:x[2]})})});
  var names=Object.keys(tiers);Object.keys(P).forEach(function(n){if(names.indexOf(n)<0)names.push(n)});
- var list=names.map(function(n){var p=P[n]||{n:n,g:0,w:0,k:0,h:[]};p.l=p.g-p.w;p.wr=p.g?p.w/p.g:0;p.kd=p.g?p.k/p.g:0;p.t=tierOf(tiers[n]?tiers[n][0]:'');p.pen=tiers[n]?tiers[n][1]:'';p.best=p.h.length?Math.max.apply(null,p.h.map(function(h){return h.k})):0;P[n]=p;return p});
+ var list=names.map(function(n){var p=P[n]||{n:n,g:0,w:0,k:0,h:[],dg:0,dl:0};p.ad=p.dg?p.dl/p.dg:0;p.l=p.g-p.w;p.wr=p.g?p.w/p.g:0;p.kd=p.g?p.k/p.g:0;p.t=tierOf(tiers[n]?tiers[n][0]:'');p.pen=tiers[n]?tiers[n][1]:'';p.best=p.h.length?Math.max.apply(null,p.h.map(function(h){return h.k})):0;P[n]=p;return p});
  var rec=list.filter(function(p){return p.g});if(only)list=rec;
  ['wr','kd','k'].forEach(function(k){var l=rec.slice().sort(function(a,b){return (b[k]-a[k])||(b.g-a.g)});l.forEach(function(p,i){p['r_'+k]=i+1})});
  return {games:games,P:P,list:list,rec:rec};
@@ -605,7 +608,7 @@ function rSide(){
 function order(cnt){return TIERS.filter(function(t){return cnt[t]}).concat(Object.keys(cnt).filter(function(t){return TIERS.indexOf(t)<0}))}
 function rRank(){
  var m=M[MODE];var l=m.rec.filter(function(p){return p.g>=MINR}).sort(function(a,b){return (b[RK]-a[RK])||(b.g-a.g)}).slice(0,10);
- $('rTitle').textContent={wr:'최고 승률 TOP 10',kd:'평균 KD TOP 10',k:'전체 킬 TOP 10'}[RK];
+ $('rTitle').textContent={wr:'최고 승률 TOP 10',kd:'평균 KD TOP 10',k:'누적 킬 TOP 10'}[RK];
  if(!l.length){$('rankList').innerHTML='<div class="empty" style="padding:24px 0">기록이 부족해요</div>';return}
  $('rankList').innerHTML=l.map(function(p,i){var v=RK=='wr'?pct(p.wr):RK=='kd'?f2(p.kd):p.k+'킬';var s=RK=='wr'?p.w+'승 '+p.l+'패':p.g+'판';
   return '<div class="ri" data-p="'+esc(p.n)+'"><div class="n">'+(i+1)+'</div><div><b>'+esc(p.n)+'</b><div class="s">'+esc(p.t)+'</div></div><div class="p">'+v+'<span>'+s+'</span></div></div>'}).join('');
@@ -617,7 +620,7 @@ var TSEL='__all';
 function pCard(p,i,showT){var c=tc(p.t),init=esc(Array.from(p.n)[0]||'?');
  var rec=p.h.slice(0,12).map(function(x){var d=gDate(x.g);return '<i class="'+(x.w?'w':'l')+'" data-t="'+esc(d[0]+' '+d[1]+' · '+(x.g.r||'')+' · '+x.k+'킬'+(x.w?' · 승':''))+'"></i>'}).join('');
  return '<div class="pc'+(p.g?'':' no')+'" data-p="'+esc(p.n)+'" style="--tc:'+c+'"><div class="ph"><div class="av">'+init+'</div><div class="pn"><b>'+esc(p.n)+'</b><span>'+(showT?esc(p.t)+' · ':'')+(p.g?'승률 <em>'+p.r_wr+'위</em> · KD <em>'+p.r_kd+'위</em>':'기록 없음')+'</span></div>'+(showT?'':'<div class="rkb'+(i==0&&p.g?' t1':'')+'">#'+(i+1)+'</div>')+'</div>'+
-  (p.g?'<div class="ps"><div><span>승률</span><b>'+pct(p.wr)+'</b></div><div class="hl"><span>평균 KD</span><b>'+f2(p.kd)+'</b></div><div><span>전체 킬</span><b>'+p.k+'</b></div></div><div class="wrbar"><b style="width:'+Math.max(2,Math.round(p.wr*100))+'%"></b></div><div class="rec">'+rec+'</div><div class="pf"><span><b>'+p.g+'</b>전 '+p.w+'승 '+p.l+'패</span><span>최고 <b>'+p.best+'</b>킬</span></div>':'<div class="pe">아직 참여한 경기가 없어요</div>')+'</div>'}
+  (p.g?'<div class="ps"><div class="hl"><span>평균 KD</span><b>'+f2(p.kd)+'</b></div><div><span>승률</span><b>'+pct(p.wr)+'</b></div><div><span>누적 킬</span><b>'+p.k+'</b></div><div><span>참여</span><b>'+p.g+'</b></div></div>'+(p.dg?'<div class="pdl">💥 평균 딜 <b>'+Math.round(p.ad).toLocaleString()+'</b><span>킬딜 '+p.dg+'판</span></div>':'')+'<div class="wrbar"><b style="width:'+Math.max(2,Math.round(p.wr*100))+'%"></b></div><div class="rec">'+rec+'</div><div class="pf"><span><b>'+p.g+'</b>전 '+p.w+'승 '+p.l+'패</span><span>최고 <b>'+p.best+'</b>킬</span></div>':'<div class="pe">아직 참여한 경기가 없어요</div>')+'</div>'}
 function rTier(){
  var m=M[MODE];var groups={};m.list.forEach(function(p){(groups[p.t]=groups[p.t]||[]).push(p)});
  var cnt={};Object.keys(groups).forEach(function(t){cnt[t]=groups[t].length});var ts=order(cnt);
@@ -660,28 +663,28 @@ function rGames(){
 function openP(n){var m=M[MODE],p=m.P[n];if(!p)return;
  var h='<div class="mdh"><div><h3>'+esc(n)+'</h3>'+tchip(p.t)+' <span class="cnt">'+mLabel(MODE)+' 기록</span></div><button class="x" id="xx">×</button></div>';
  if(!p.g)h+='<div class="empty">아직 기록이 없어요</div>';
- else{h+='<div class="ms"><div><span>참여</span><b>'+p.g+'</b></div><div><span>승 / 패</span><b>'+p.w+' / '+p.l+'</b></div><div><span>승률</span><b>'+pct(p.wr)+'</b></div><div><span>평균 KD</span><b style="color:var(--gold)">'+f2(p.kd)+'</b></div><div><span>전체 킬</span><b>'+p.k+'</b></div><div><span>최고 킬</span><b>'+p.best+'</b></div><div><span>승률 순위</span><b>'+p.r_wr+'위</b></div><div><span>KD 순위</span><b>'+p.r_kd+'위</b></div></div>'+
+ else{h+='<div class="ms"><div><span>평균 KD</span><b style="color:var(--gold)">'+f2(p.kd)+'</b></div><div><span>승률</span><b>'+pct(p.wr)+'</b></div><div><span>누적 킬</span><b>'+p.k+'</b></div><div><span>참여</span><b>'+p.g+'</b></div>'+(p.dg?'<div><span>평균 딜 (킬딜 '+p.dg+'판)</span><b style="color:#ffb35c">'+Math.round(p.ad).toLocaleString()+'</b></div>':'')+'<div><span>승 / 패</span><b>'+p.w+' / '+p.l+'</b></div><div><span>최고 킬</span><b>'+p.best+'</b></div><div><span>KD 순위</span><b>'+p.r_kd+'위</b></div><div><span>승률 순위</span><b>'+p.r_wr+'위</b></div></div>'+
   '<div class="mh">'+p.h.map(function(x,i){var d=gDate(x.g);return '<div class="hw"><div class="hi" data-hi="'+i+'"><span class="r '+(x.w?'W':'L')+'">'+(x.w?'W':'L')+'</span><span>'+esc(d[0]+' '+d[1])+'</span><span class="rb '+ruleCls(x.g.r)+'">'+esc(x.g.r||'기타')+'</span><b>'+x.k+'킬</b><span class="hmore">자세히 ▾</span></div><div class="hd"></div></div>'}).join('')+'</div>'}
  $('md').innerHTML=h;$('ov').classList.add('on');$('xx').onclick=closeP;$('md').dataset.pn=n}
 function closeP(){$('ov').classList.remove('on')}
 
 // ---------- events ----------
 // ---------- full ranking ----------
-var RVL={wr:'승률',kd:'평균 KD',k:'전체 킬',g:'참여'};
+var RVL={wr:'승률',kd:'평균 KD',k:'누적 킬',g:'참여',ad:'평균 딜'};
 function rFull(){
  var m=M[MODE];var l=m.rec.filter(function(p){return p.g>=RMIN}).sort(function(a,b){return (b[RV]-a[RV])||(b.g-a.g)||(b.kd-a.kd)||a.n.localeCompare(b.n)});
  var rk=[],prev=null;l.forEach(function(p,i){rk.push(prev!==null&&p[RV]===l[i-1][RV]?rk[i-1]:i+1);prev=p[RV]});
- var cols=[['g','참여',''],['w','승/패','hm'],['wr','승률',''],['kd','평균 KD',''],['k','전체 킬',''],['best','최고 킬','hm']];
+ var hasD=l.some(function(p){return p.dg});var cols=[['kd','평균 KD',''],['wr','승률',''],['k','누적 킬',''],['g','참여',''],['w','승/패','hm'],['best','최고 킬','hm']];if(hasD)cols.push(['ad','평균 딜','']);
  var h='<section class="card tier"><div class="th"><h2 style="color:var(--gold)">전체 순위 · '+RVL[RV]+'순</h2><span class="cnt">'+l.length+'명</span></div>'+
-  '<div class="rbar"><div class="seg seg4" style="grid-template-columns:repeat(4,auto)" id="rview2">'+['wr','kd','k','g'].map(function(k){return '<button data-rv="'+k+'" class="'+(RV==k?'on rv':'')+'" style="padding:7px 12px">'+RVL[k]+'순</button>'}).join('')+'</div><span class="sp"></span>'+
+  '<div class="rbar"><div class="seg seg4" style="grid-template-columns:repeat(4,auto)" id="rview2">'+['kd','wr','k','g'].map(function(k){return '<button data-rv="'+k+'" class="'+(RV==k?'on rv':'')+'" style="padding:7px 12px">'+RVL[k]+'순</button>'}).join('')+'</div><span class="sp"></span>'+
   '<select class="rsel" id="rmin">'+[1,3,5,10].map(function(n){return '<option value="'+n+'"'+(RMIN==n?' selected':'')+'>'+(n==1?'전체 참가자':n+'판 이상 참여')+'</option>'}).join('')+'</select></div>'+
   '<div class="tscroll"><table class="rt"><thead><tr><th class="l">#</th><th class="l">닉네임</th>'+cols.map(function(c){return '<th class="'+(c[0]==RV?'on ':'')+c[2]+'"'+(c[0]=='w'||c[0]=='best'?'':' data-rv="'+c[0]+'"')+'>'+c[1]+(c[0]==RV?' ↓':'')+'</th>'}).join('')+'</tr></thead><tbody>';
  var rows=0;l.forEach(function(p,i){if(Q&&p.n.toLowerCase().indexOf(Q)<0)return;rows++;
   h+='<tr class="rw'+(rk[i]<=3?' t3':'')+'" data-p="'+esc(p.n)+'"><td class="l rn">'+rk[i]+'</td><td class="l nmc"><b>'+esc(p.n)+'</b>'+tchip(p.t)+'</td>'+
-   '<td class="'+(RV=='g'?'on':'')+'">'+p.g+'</td><td class="hm">'+p.w+' / '+p.l+'</td>'+
+   '<td class="'+(RV=='kd'?'on':'')+'">'+f2(p.kd)+'</td>'+
    '<td class="'+(RV=='wr'?'on':'')+'"><span class="wbar"><i><b style="width:'+(p.wr*100)+'%"></b></i>'+pct(p.wr)+'</span></td>'+
-   '<td class="'+(RV=='kd'?'on':'')+'">'+f2(p.kd)+'</td><td class="'+(RV=='k'?'on':'')+'">'+p.k+'</td><td class="hm">'+p.best+'</td></tr>'});
- if(!rows)h+='<tr><td colspan="8" class="empty">'+(Q?'검색 결과가 없어요':'기록이 없어요')+'</td></tr>';
+   '<td class="'+(RV=='k'?'on':'')+'">'+p.k+'</td><td class="'+(RV=='g'?'on':'')+'">'+p.g+'</td><td class="hm">'+p.w+' / '+p.l+'</td><td class="hm">'+p.best+'</td>'+(hasD?'<td class="'+(RV=='ad'?'on':'')+'">'+(p.dg?Math.round(p.ad).toLocaleString():'-')+'</td>':'')+'</tr>'});
+ if(!rows)h+='<tr><td colspan="9" class="empty">'+(Q?'검색 결과가 없어요':'기록이 없어요')+'</td></tr>';
  $('board').innerHTML=h+'</tbody></table></div></section>';
 }
 function syncRV(){document.querySelectorAll('#rview button').forEach(function(b){b.classList.toggle('on',VIEW=='rank'&&b.dataset.rv==RV);b.classList.toggle('rv',VIEW=='rank'&&b.dataset.rv==RV)})}
