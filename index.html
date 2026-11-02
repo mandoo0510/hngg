@@ -527,7 +527,7 @@ body.rkopen .rkBg{opacity:1;pointer-events:auto}
   </div>
   <div class="stat st2">
    <div class="lbl">기록 구분</div>
-   <div class="seg mseg" id="mode" style="grid-template-columns:repeat(3,1fr)"><button data-m="all" class="on" style="grid-column:1/-1">통합 KD</button><span class="mg">킬내기</span><button data-m="k:연도룰">연도룰</button><button data-m="k:대꼴룰">대꼴룰</button><button data-m="k:지옥룰">지옥룰</button><span class="mg">킬딜내기</span><button data-m="d:연도룰">연도룰</button><button data-m="d:대꼴룰">대꼴룰</button><button data-m="d:지옥룰">지옥룰</button></div>
+   <div class="seg mseg" id="mode" style="grid-template-columns:repeat(3,1fr)"><button data-m="all" class="on" style="grid-column:1/-1">통합 KD</button><span class="mg">킬내기</span><button data-m="k:연도룰">연도룰</button><button data-m="k:대꼴룰">대꼴룰</button><button data-m="k:지옥룰">지옥룰</button><span class="mg">킬딜내기</span><button data-m="d:연도룰">연도룰</button><button data-m="d:대꼴룰">대꼴룰</button><button data-m="d:지옥룰">지옥룰</button><span class="mg">워크룰 킬내기</span><button data-m="w" style="grid-column:1/-1">워크룰 (최고 판 점수)</button></div>
   </div>
   <div class="stat st2" id="sbox" style="display:none">
    <div class="lbl">시즌별 보기</div>
@@ -597,7 +597,7 @@ var JN=0;
 function api(k,ok){var done=false,cb='__hh'+(++JN),sc=document.createElement('script');var t=setTimeout(function(){fin(null)},25000);
  function fin(d){if(done)return;done=true;clearTimeout(t);try{delete window[cb]}catch(_){window[cb]=undefined}if(sc.parentNode)sc.parentNode.removeChild(sc);ok(d&&!d.error?d:null)}
  window[cb]=function(d){fin(d)};sc.onerror=function(){fin(null)};sc.src=API+'?v=api&k='+k+'&callback='+cb+'&_='+Date.now();document.head.appendChild(sc)}
-function mLabel(m){if(m=='all')return '통합';var q=String(m).split(':');return (q[0]=='d'?'킬딜내기 ':'킬내기 ')+(q[1]||'')}
+function mLabel(m){if(m=='all')return '통합';if(m=='w')return '워크룰 킬내기';var q=String(m).split(':');return (q[0]=='d'?'킬딜내기 ':'킬내기 ')+(q[1]||'')}
 function build(games,tiers,only){
  games=games.slice().sort(function(a,b){return b.t-a.t});var P={};
  games.forEach(function(g){var dm=null;if(/킬딜/.test(g.l)&&g.d){dm={};g.d.forEach(function(t){t.m.forEach(function(m){dm[m[0]]=Number(m[4])||0})})}g.p.forEach(function(x){var n=x[0];var p=P[n]||(P[n]={n:n,g:0,w:0,k:0,h:[],dg:0,dl:0});p.g++;p.w+=x[2];p.k+=x[1];if(dm&&dm[n]!=null){p.dg++;p.dl+=dm[n]}p.h.push({g:g,k:x[1],w:x[2]})})});
@@ -611,7 +611,8 @@ function prep(){
  var t=D.base.t,seen={},all=D.base.g.concat((D.dk&&D.dk.g)||[]).filter(function(g){if(seen[g.id])return false;seen[g.id]=1;return true});
  M.all=build(all,t);M.base=M.all;
  ['연도룰','대꼴룰','지옥룰'].forEach(function(r){M['k:'+r]=build(all.filter(function(g){return !/킬딜/.test(g.l)&&g.r==r}),t,1);M['d:'+r]=build(all.filter(function(g){return /킬딜/.test(g.l)&&g.r==r}),t,1)});
- if(!M[MODE])MODE='all';
+ M.w=build(((D.wr||{}).g)||[],t,1);
+if(!M[MODE])MODE='all';
 }
 
 // ---------- side & rank ----------
