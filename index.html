@@ -362,6 +362,9 @@ body.vteam .rank,body.vteam .rkTab{display:none}
 .gcf{background:#e1ebf8;color:#3a4f6a;text-align:center;padding:5px 6px;font-size:11.5px;font-weight:700;border-top:1px solid #c7d6ea}
 .gcard.g1{border-color:#c9a227}.gcard.g1 .gch{background:#f5c542;color:#4a3b00;border-color:#c9a227}.gcard.g1 .gcf{background:#fdf1c7;color:#6b5400}
 .gcard.g2{border-color:#8d97a5}.gcard.g2 .gch{background:#c3cad4;color:#2f3742;border-color:#8d97a5}.gcard.g2 .gcf{background:#eceff3;color:#4b5563}
+.bgd{display:grid;gap:2px;padding:8px;background:#fff}
+.bgd i{font-style:normal;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:1px solid #cbd5e1;border-radius:4px;font-size:11px;font-weight:800;color:#1f2937;background:#fff}
+.gcf .bm{cursor:pointer}.gcf .bm.me{color:var(--gold);text-decoration:underline}
 .gcard.g3{border-color:#b0723f}.gcard.g3 .gch{background:#d99a63;color:#4a2a10;border-color:#b0723f}.gcard.g3 .gcf{background:#f5e1cf;color:#6b3d1a}
 .gdt{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:8px}
 .gtm{background:var(--s1);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -658,7 +661,13 @@ function rTier(){
    '<div class="tstat"><div><span>티어 평균 KD</span><b>'+(g?f2(k/g):'-')+'</b></div><div><span>티어 승률</span><b>'+(g?pct(w/g):'-')+'</b></div><div><span>총 참여</span><b>'+g+'</b></div></div></div>';}
  $('board').innerHTML='<section class="card tier tsel">'+h+(ps.length?'<div class="pgrid">'+ps.map(function(p,i){return pCard(p,i,!!Q)}).join('')+'</div>':'<div class="empty">검색 결과가 없어요</div>')+'</section>';
 }
+function bFg(h){var c=String(h||'').replace('#','');if(c.length!=6)return '#fff';var r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);return (0.299*r+0.587*g+0.114*b)>150?'#111827':'#fff'}
+function bDetail(g,me){var B={};(g.b||[]).forEach(function(b){B[b.no]=b});var ts=(g.d||[]).slice().sort(function(a,b){return (a.rk-b.rk)||(a.no-b.no)});
+ return '<div class="gcards">'+ts.map(function(t){var b=B[t.no];var mine=me&&t.m.some(function(x){return x[0]==me});var md=t.rk>=1&&t.rk<=3?['🥇','🥈','🥉'][t.rk-1]:'';var cap=t.m[0]?t.m[0][0]:t.no;var col=(b&&b.c)||'#ff9900',fg=bFg(col);
+  var grid='';if(b&&b.n){grid='<div class="bgd" style="grid-template-columns:repeat('+b.n+',1fr)">';for(var i=0;i<b.n;i++)for(var j=0;j<b.n;j++){var v=(b.v[i]||[])[j];var on=String(b.m).charAt(i*b.n+j)==='1';grid+='<i'+(on?' style="background:'+col+';color:'+fg+';border-color:'+col+'"':'')+'>'+esc(v==null?'':v)+'</i>'}grid+='</div>'}else grid='<div class="gnote" style="padding:6px">빙고판 저장 전 기록</div>';
+  return '<div class="gcard'+(md?' g'+t.rk:'')+(mine?' mine':'')+'"><div class="gch">'+(md?md+' ':'')+esc(cap)+'팀   '+t.s+'줄<i>'+t.no+'팀 · '+t.rk+'위</i></div>'+grid+'<div class="gcf">'+t.m.map(function(x){return '<span class="bm'+(me&&x[0]==me?' me':'')+'" data-p="'+esc(x[0])+'">'+esc(x[0])+'</span>'}).join(' · ')+'</div></div>'}).join('')+'</div>'}
 function gDetail(g,me){
+ if(/빙고/.test(g.l)&&g.d&&g.d.length)return bDetail(g,me);
  if(!g.d||!g.d.length){var ps=g.p.slice().sort(function(a,b){return (b[2]-a[2])||(b[1]-a[1])});return '<div class="gnote">이 경기는 팀·다이·치킨 정보가 저장되기 전 기록이라 킬만 보여요</div><div class="gl">'+ps.map(function(x){return '<div class="gp '+(x[2]?'w':'')+(me&&x[0]==me?' me':'')+'" data-p="'+esc(x[0])+'">'+(x[2]?'🍗 ':'')+esc(x[0])+'<b>'+x[1]+'</b></div>'}).join('')+'</div>'}
  var ts=g.d.slice().sort(function(a,b){return (a.rk-b.rk)||(a.no-b.no)});var any=ts.some(function(t){return t.s!==0});var deal=ts.some(function(t){return t.m.some(function(x){return x[4]})});
  return '<div class="gcards">'+ts.map(function(t){var mine=me&&t.m.some(function(x){return x[0]==me});var md=any&&t.rk>=1&&t.rk<=3?['🥇','🥈','🥉'][t.rk-1]:'';var cap=t.m[0]?t.m[0][0]:t.no;
