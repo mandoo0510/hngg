@@ -583,8 +583,8 @@ body.rkopen .rkBg{opacity:1;pointer-events:auto}
 var API='https://script.google.com/macros/s/AKfycbyHfQC9_hT0G_H6OTzXVVCelz2K875S161yXT2gbxy-DNxpmWdnzkRycx8ZF8Bikkke/exec';
 var CURD=null,SEAS='';
 var D=null,M={},MODE='all',VIEW='tier',RK='kd',Q='',RULE='전체',GLIM=25,CHIPN=15,MINR=3,RV='kd',RMIN=1;
-var TIERS=['갓티어','1티어 상','1티어 하','2티어 상','2티어 하','3티어','4티어','BABY티어','미배정'];
-var TC={'갓티어':'#ff5a76','1티어 상':'#ff9f43','1티어 하':'#f6c560','2티어 상':'#2ed3b7','2티어 하':'#62c6ee','3티어':'#9b8cff','4티어':'#a3adbf','BABY티어':'#f59bd0','미배정':'#6b7280'};
+var TIERS=['갓티어','1티어 상','1티어 중','1티어 하','2티어 상','2티어 하','3티어','4티어','BABY티어','미배정','유령티어'];
+var TC={'유령티어':'#555b66','1티어 중':'#fbb24f','갓티어':'#ff5a76','1티어 상':'#ff9f43','1티어 하':'#f6c560','2티어 상':'#2ed3b7','2티어 하':'#62c6ee','3티어':'#9b8cff','4티어':'#a3adbf','BABY티어':'#f59bd0','미배정':'#6b7280'};
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function tierOf(t){t=String(t||'').trim();if(!t)return '미배정';if(TC[t])return t;for(var i=0;i<TIERS.length;i++)if(t.replace(/\s/g,'')==TIERS[i].replace(/\s/g,''))return TIERS[i];return t}
@@ -603,9 +603,9 @@ function api(k,ok){var done=false,cb='__hh'+(++JN),sc=document.createElement('sc
 function mLabel(m){if(m=='all')return '통합';if(m=='w')return '워크룰 킬내기';if(m=='g')return '빙고 전체';if(m=='gk')return '빙고 킬내기';if(m=='gb')return '빙고 깐부 킬내기';var q=String(m).split(':');return ({k:'킬내기 ',d:'킬딜내기 ',wk:'수요일 킬내기 ',wd:'수요일 킬딜내기 ',kb:'깐부 킬내기 '}[q[0]]||'')+(q[1]||'')}
 function build(games,tiers,only){
  games=games.slice().sort(function(a,b){return b.t-a.t});var P={};
- games.forEach(function(g){var dm=null;if(/킬딜/.test(g.l)&&g.d){dm={};g.d.forEach(function(t){t.m.forEach(function(m){dm[m[0]]=Number(m[4])||0})})}g.p.forEach(function(x){var n=x[0];var p=P[n]||(P[n]={n:n,g:0,w:0,k:0,h:[],dg:0,dl:0});p.g++;p.w+=x[2];p.k+=x[1];if(dm&&dm[n]!=null){p.dg++;p.dl+=dm[n]}p.h.push({g:g,k:x[1],w:x[2]})})});
+ games.forEach(function(g){var dm=null;if(/킬딜/.test(g.l)&&g.d){dm={};g.d.forEach(function(t){t.m.forEach(function(m){dm[m[0]]=Number(m[4])||0})})}g.p.forEach(function(x){var n=x[0];var p=P[n]||(P[n]={n:n,g:0,w:0,k:0,h:[],dg:0,dl:0});p.g++;p.w+=x[2];p.k+=x[1];p.np=(p.np||0)+(Number(x[3])||0);if(dm&&dm[n]!=null){p.dg++;p.dl+=dm[n]}p.h.push({g:g,k:x[1],w:x[2]})})});
  var names=Object.keys(tiers);Object.keys(P).forEach(function(n){if(names.indexOf(n)<0)names.push(n)});
- var list=names.map(function(n){var p=P[n]||{n:n,g:0,w:0,k:0,h:[],dg:0,dl:0};p.ad=p.dg?p.dl/p.dg:0;p.l=p.g-p.w;p.wr=p.g?p.w/p.g:0;p.kd=p.g?p.k/p.g:0;p.t=tierOf(tiers[n]?tiers[n][0]:'');p.pen=tiers[n]?tiers[n][1]:'';p.best=p.h.length?Math.max.apply(null,p.h.map(function(h){return h.k})):0;P[n]=p;return p});
+ var list=names.map(function(n){var p=P[n]||{n:n,g:0,w:0,k:0,h:[],dg:0,dl:0};p.ad=p.dg?p.dl/p.dg:0;p.l=p.g-p.w;p.wr=p.g?p.w/p.g:0;p.kd=(D&&D.kdBy==='maps')?(p.np?p.k/p.np:0):(p.g?p.k/p.g:0);p.t=tierOf(tiers[n]?tiers[n][0]:'');p.pen=tiers[n]?tiers[n][1]:'';p.best=p.h.length?Math.max.apply(null,p.h.map(function(h){return h.k})):0;P[n]=p;return p});
  var rec=list.filter(function(p){return p.g});if(only)list=rec;
  ['wr','kd','k'].forEach(function(k){var l=rec.slice().sort(function(a,b){return (b[k]-a[k])||(b.g-a.g)});l.forEach(function(p,i){p['r_'+k]=i+1})});
  return {games:games,P:P,list:list,rec:rec};
