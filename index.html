@@ -583,8 +583,8 @@ body.rkopen .rkBg{opacity:1;pointer-events:auto}
 var API='https://script.google.com/macros/s/AKfycbyHfQC9_hT0G_H6OTzXVVCelz2K875S161yXT2gbxy-DNxpmWdnzkRycx8ZF8Bikkke/exec';
 var CURD=null,SEAS='';
 var D=null,M={},MODE='all',VIEW='tier',RK='kd',Q='',RULE='전체',GLIM=25,CHIPN=15,MINR=3,RV='kd',RMIN=1;
-var TIERS=['갓티어','1티어 상','1티어 중','1티어 하','2티어 상','2티어 하','3티어','4티어','BABY티어','미배정','유령티어'];
-var TC={'유령티어':'#555b66','1티어 중':'#fbb24f','갓티어':'#ff5a76','1티어 상':'#ff9f43','1티어 하':'#f6c560','2티어 상':'#2ed3b7','2티어 하':'#62c6ee','3티어':'#9b8cff','4티어':'#a3adbf','BABY티어':'#f59bd0','미배정':'#6b7280'};
+var TIERS=['갓티어','1티어 상','1티어 중','1티어 하','2티어 상','2티어 하','3티어 상','3티어 하','3티어','4티어','BABY티어','미배정','유령티어'];
+var TC={'3티어 상':'#9b8cff','3티어 하':'#b6abff','유령티어':'#555b66','1티어 중':'#fbb24f','갓티어':'#ff5a76','1티어 상':'#ff9f43','1티어 하':'#f6c560','2티어 상':'#2ed3b7','2티어 하':'#62c6ee','3티어':'#9b8cff','4티어':'#a3adbf','BABY티어':'#f59bd0','미배정':'#6b7280'};
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function tierOf(t){t=String(t||'').trim();if(!t)return '미배정';if(TC[t])return t;for(var i=0;i<TIERS.length;i++)if(t.replace(/\s/g,'')==TIERS[i].replace(/\s/g,''))return TIERS[i];return t}
